@@ -1,45 +1,55 @@
 const fs = require("fs");
 const express = require("express");
 const path = require("path");
-const { get } = require("http");
+const uuid = require("uuid");
+
+let noteData = require("./db/db.json");
 
 const app = express();
 const PORT = process.env.PORT || 8000
 
-app.use(express.static('public'));
-app.use(express.urlencoded({extended: true}));
+app.listen(PORT, () => {
+    console.log(`Server started on port ${PORT}`);
+});
+
 app.use(express.json());
+app.use(express.urlencoded({extended: false}));
+
+app.use(express.static("public"));
+
+app.get("/", (req, res) => {
+    res.sendFile(path.join(__dirname, "public", "index.html"));
+});
 
 app.get("/notes", (req, res) => {
-    res.sendFile(path.join(__dirname, "/public/notes.html"));
+    res.sendFile(path.join(__dirname, "public", "notes.html"));
 });
 
 app.get("/api/notes", (req, res) => {
-    res.sendFile(path.join(__dirname, "/db/db.json"));
+    res.json(noteData);
 });
 
-app/get("*", (req, res) => {
-    let newNote = req.body;
-    let noteList = JSON.parse(fs.readFileSync("./db/db.json", "utf8"));
-    let notelength = (noteList.length).toString();
+app.post("/api/notes", (req, res) => {
+    const newNote = {
+        title: req.body.title,
+        text: req.body.text,
+        id: uuid.v4(),
+    }
 
-    newNote.id = notelength;
-    noteList.push(newNote);
+    noteData.push(newNote);
+    res.json(noteData);
 
-    fs.writeFileSync("./db/db.json", JSON.stringify(noteList));
-    res.json(noteList);
+    fs.writeFile("db/db.json", JSON.stringify(noteData), (err) => {
+        if (err) throw err;
+    });
 });
 
 app.delete("/api/notes/:id", (req, res) => {
-    let noteList = JSON.parse(fs.readFileSync("./db/db.json", "utf8"));
-    let noteId = (req.params.id).toString();
+    let { id } = req.params;
+    noteData = noteData.filter((note) => note.id !== id);
+    res.send(`User with the id ${id} has been deleted from the database`);
+    fs.writeFile("db/db.json", JSON.stringify(noteData), (err) => {
+        if (err) throw err;
+    });
+});
 
-    noteList = noteList.filter(selected => {
-        return selected.id != noteId;
-    })
-
-    fs.writeFileSync("./db/db.json", JSON.stringify(noteList));
-    res.json(noteList);
-})
-
-app.listen(PORT, () => console.log("Server listening on port " + PORT));
