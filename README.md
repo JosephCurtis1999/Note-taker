@@ -43,9 +43,7 @@ THEN I am presented with empty fields to enter a new note title and the note’s
 
 The following images show the web application's appearance and functionality:
 
-
-
-
+![notetaker](https://user-images.githubusercontent.com/94229291/158035966-b6a41bcc-baf6-4da9-9eff-1e7e681b1cd5.jpg)
 
 
 ## Credits
