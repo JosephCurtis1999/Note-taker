@@ -28,4 +28,16 @@ app/get("*", (req, res) => {
 
     fs.writeFileSync("./db/db.json", JSON.stringify(noteList));
     res.json(noteList);
+});
+
+app.delete("/api/notes/:id", (req, res) => {
+    let noteList = JSON.parse(fs.readFileSync("./db/db.json", "utf8"));
+    let noteId = (req.params.id).toString();
+
+    noteList = noteList.filter(selected => {
+        return selected.id != noteId;
+    })
+
+    fs.writeFileSync("./db/db.json", JSON.stringify(noteList));
+    res.json(noteList);
 })
